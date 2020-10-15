@@ -1,0 +1,6 @@
+php artisan make:controller <namacontroller> -r -m <namamodel>
+php artisan serve
+php artisan make:controller <namacontroller> -r
+php artisan make:controller <namamodel>
+php artisan make:migration <nama table>
+php artisan migrate:rollback
