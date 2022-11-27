@@ -19,7 +19,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'level',
         'password',
+        'remember_token',
     ];
 
     /**
@@ -31,7 +33,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-
+    protected $primaryKey = 'id_user';
     /**
      * The attributes that should be cast to native types.
      *

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Charts\UserChart;
 
 class SoalController extends Controller
 {
@@ -14,10 +15,10 @@ class SoalController extends Controller
      */
     public function index()
     {
-        $soal = \App\Models\soal::all();
+        $soal = DB::table('soals')->join('flag', 'flag.id_soal', '=', 'soals.id_soal')->select('soals.*', 'flag.flag')->get();
         // $soal = DB::table('soal')->get();
         // dd($soal);
-        return view('soal.index',['soal' => $soal]);
+        return view('admin.index',compact('soal'));
     }
 
     /**
@@ -27,7 +28,9 @@ class SoalController extends Controller
      */
     public function create()
     {
-        return view('soal.input-soal',['soal' => \App\Models\soal::all()]);
+        return view('admin.input-soal',[
+            'soal' => \App\Models\Soal::all(),
+            ]);
     }
 
     /**
@@ -40,13 +43,26 @@ class SoalController extends Controller
     {
 
         $request->validate([
-        'soal' => 'required|max:20',
+        'nama_soal' => 'required|max:20',
         'keterangan' => 'required|max:255',
         'kategori' => 'required',
+        'clue' => 'required',
+        'nilai' => 'required',
         'aktif_soal' => 'required',
+        'waktu' => 'required',
         ]);
-        \App\Models\soal::create($request->all());
-        return redirect('/soal')->with('status', 'Soal berhasil ditambahkan!');
+        $soal= \App\Models\Soal::create([
+            'nama_soal' => $request->nama_soal,
+            'keterangan' => $request->keterangan,
+            'kategori' => $request->kategori,
+            'clue' => $request->clue,
+            'nilai' => $request->nilai,
+            'aktif_soal' => $request->aktif_soal,
+            'waktu' => $request->waktu,
+        ]);
+        //dd($soal);
+        $id = $soal->id;
+        return redirect()->to('/admin/input-flag/'.$id)->with('status', 'Soal berhasil ditambahkan!');
     }
 
     /**
@@ -57,9 +73,10 @@ class SoalController extends Controller
      */
     public function show(Request $request,$id)
     {
-        $soal = \App\Models\soal::findOrFail($id);
-        // dd($soal);
-        return view('soal.detail-soal',['soal' => $soal]);
+        $soal = \App\Models\Soal::where('id_soal',$id)->firstOrFail();
+        $flag = \App\Models\Flag::where('id_soal',$id)->firstOrFail();
+         //dd($soal);
+        return view('admin.detail-soal',['soal' => $soal,'flag' => $flag]);
     }
 
     /**
@@ -70,8 +87,12 @@ class SoalController extends Controller
      */
     public function edit($id)
     {
-        $soal = \App\Models\soal::findOrFail($id);
-        return view('soal.edit',['soal' => $soal]);
+        $soal = \App\Models\Soal::where('id_soal',$id)->firstOrFail();
+        $flag = \App\Models\Flag::where('id_soal',$id)->firstOrFail();
+        return view('admin.edit',[
+        'soal' => $soal,
+        'flag' => $flag,
+        ]);
     }
 
     /**
@@ -84,19 +105,34 @@ class SoalController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-        'soal' => 'required|max:20',
-        'keterangan' => 'required|max:255',
-        'kategori' => 'required',
-        'aktif_soal' => 'required',
+            'nama_soal' => 'required|max:20',
+            'keterangan' => 'required|max:255',
+            'kategori' => 'required',
+            'clue' => 'required',
+            'nilai' => 'required',
+            'aktif_soal' => 'required',
+            'flag' => 'required|max:50',
+            'waktu' => 'required',
+            'edukasi' => 'required',
         ]);
-        $soal = \App\Models\soal::where('id',$id)
+        $soal = \App\Models\Soal::where('id_soal',$id)
                                 ->update([
-                                    'soal' => $request->soal,
+                                    'nama_soal' => $request->nama_soal,
                                     'keterangan' => $request->keterangan,
                                     'kategori' => $request->kategori,
+                                    'clue' => $request->clue,
+                                    'nilai' => $request->nilai,
                                     'aktif_soal' => $request->aktif_soal,
+                                    'waktu' => $request->waktu,
                                 ]);
-    return redirect('/soal')->with('status', 'Soal berhasil dirubah!');
+        $flag = \App\Models\Flag::where('id_soal',$id)
+        ->update([
+            'flag' => $request->flag,
+            'edukasi' => $request->edukasi,
+        ]);
+       // dd($soal);
+       // dd($flag);
+    return redirect('/admin')->with('status', 'Soal berhasil dirubah!');
     }
 
     /**
@@ -105,9 +141,57 @@ class SoalController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request,$id)
     {
-        $soal = \App\Models\soal::destroy($id);
-        return redirect('/soal')->with('status', 'Soal berhasil dihapus!');;
+        $soal = \App\Models\Soal::where('id_soal',$id)->delete();
+        $flag = \App\Models\Flag::where('id_soal',$id)->delete();
+        $status = \App\Models\Status::where('id_soal',$id)->delete();
+        return redirect('/admin')->with('status', 'Soal berhasil dihapus!');
+    }
+
+    public function createflag($id)
+    {
+        $soal = \App\Models\Soal::where('id_soal',$id)->firstOrFail();
+        return view('admin.input-flag',[
+            'flag' => \App\Models\Flag::all(),
+            'soal' => $soal,
+            ]);
+    }
+
+    public function flag(Request $request)
+    {
+        $request->validate([
+        'flag' => 'required|max:155',
+        'edukasi' => 'required|max:155',
+        ]);
+        \App\Models\Flag::create($request->all());
+        return redirect('/admin')->with('status', 'Flag berhasil ditambahkan!');
+    }
+
+    public function player()
+    {
+        $var = 'user';
+        $var1 = 'benar';
+        $user = DB::table('status')->join('users', 'users.id_user', '=', 'status.id_user')->join('soals', 'soals.id_soal', '=', 'status.id_soal')->select('users.name','users.email',DB::raw('SUM(soals.nilai) as jumlah'),'status.*')->where('status.status','LIKE',"%{$var1}%")->where('users.level','LIKE',"%{$var}%")->groupBy('status.id_user')->orderBy('jumlah','desc')->orderBy('users.name','asc')->get();
+        $user1 = DB::table('status')->join('users', 'users.id_user', '=', 'status.id_user')->join('soals', 'soals.id_soal', '=', 'status.id_soal')->select(DB::raw('SUM(soals.nilai) as jumlah'))->where('status.status','LIKE',"%{$var1}%")->where('users.level','LIKE',"%{$var}%")->groupBy('status.id_user')->get();
+        $user2 = DB::table('status')->join('users', 'users.id_user', '=', 'status.id_user')->join('soals', 'soals.id_soal', '=', 'status.id_soal')->select('users.name')->where('status.status','LIKE',"%{$var1}%")->where('users.level','LIKE',"%{$var}%")->groupBy('status.id_user')->get();
+        //$user = \App\Models\User::where('level','LIKE',"%{$var}%")->get();
+        // $soal = DB::table('soal')->get();
+        //dd($user1);
+        
+        
+        $labels= $user2->flatten(1)->pluck('name');
+        $data= $user1->flatten(1)->pluck('jumlah');
+        $colors = $labels->map(function($item) {
+                return $rand_color = '#' . substr(md5(mt_rand()), 0, 6);
+                });
+        //dd($usersChart);
+        $usersChart = new UserChart;
+        $usersChart->labels($labels);
+        $usersChart->dataset('Scoreboard', 'polarArea', $data)->backgroundColor($colors);
+        return view('admin.player',[
+            'user' => $user,
+            'usersChart' => $usersChart,
+            ]);
     }
 }

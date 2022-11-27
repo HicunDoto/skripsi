@@ -1,11 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Jekyll v4.1.1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="author" content="Hicun">
   
     <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/dashboard/">
 
@@ -42,6 +41,7 @@
     </style>
     <!-- Custom styles for this template -->
     <link href="https://getbootstrap.com/docs/4.5/examples/dashboard/dashboard.css" rel="stylesheet">
+
   </head>
   <body>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
@@ -49,10 +49,9 @@
   <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search">
   <ul class="navbar-nav px-3">
     <li class="nav-item text-nowrap">
-      <a class="nav-link" href="{{url('/')}}">Sign out</a>
+      <a class="nav-link" href="{{url('/logout')}}">Sign out</a>
     </li>
   </ul>
 </nav>
@@ -63,19 +62,22 @@
       <div class="sidebar-sticky pt-3">
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link" href="{{url('/soal')}}">
+            <h4 class="nav-link">{{Str::upper(auth()->user()->name)}}</h4>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{url('/admin')}}">
               <span data-feather="home"></span>
               Dashboard <span class=""></span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{url('/soal/input-soal')}}">
+            <a class="nav-link" href="{{url('/admin/input-soal')}}">
               <span data-feather="flag"></span>
               Input Soal
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{{url('/admin/player')}}">
               <span data-feather="monitor"></span>
               List Player
             </a>
@@ -92,10 +94,11 @@
     </main>
   </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+@stack('script')
       <script>window.jQuery || document.write('<script src="https://getbootstrap.com/docs/4.5/assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="https://getbootstrap.com/docs/4.5/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
   <script>
 $(window).on('load', function () {
     event.preventDefault();

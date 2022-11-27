@@ -1,0 +1,5 @@
+user mesin :
+root:hicun
+doto:456256
+user mysql :
+root:hicundoto
